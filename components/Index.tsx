@@ -2,7 +2,7 @@
 import { Regex } from "@/engine/ast";
 import RegexEngine from "@/engine/interface";
 import { Token, TokenType } from "@/engine/token";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { JSONTree } from "react-json-tree";
 
 var Fragment = require("@/engine/enfa/fragment.js");
@@ -13,32 +13,37 @@ const Index = () => {
   const [testString, setTestString] = useState("");
   const [AST, setAST] = useState<Regex>();
   const [tokens, setTokens] = useState<Token[]>();
-  const regexEngine = new RegexEngine();
+  const [regexEngine, setRegexEngine] = useState(new RegexEngine());
   const [NFA, setNFA] = useState<typeof Fragment>();
   const [testResult, setTestResult] = useState<boolean>(false);
 
+  const CompileRegex = useCallback(
+    (str: string) => {
+      const RegexInstance = regexEngine.compile(str);
+      setAST(RegexInstance.ast);
+      setTokens(RegexInstance.tokens);
+      setNFA(RegexInstance.NFAFragment);
+    },
+    [regexEngine],
+  );
+
+  const TestString = useCallback(
+    (str: string) => {
+      if (testString == "" && !NFA) {
+        return;
+      }
+      setTestResult(NFA?.test(str));
+    },
+    [NFA, testString],
+  );
+
   useEffect(() => {
     CompileRegex(regexString);
-  }, [regexString]);
+  }, [regexString, CompileRegex]);
 
   useEffect(() => {
     TestString(testString);
-  }, [testString, NFA]);
-
-  const CompileRegex = (str: string) => {
-    const RegexInstance = regexEngine.compile(str);
-    setAST(RegexInstance.ast);
-    setTokens(RegexInstance.tokens);
-    setNFA(RegexInstance.NFAFragment);
-  };
-
-  const TestString = (str: string) => {
-    if (testString == "" && !NFA) {
-      return;
-    }
-    setTestResult(NFA?.test(str));
-  };
-
+  }, [TestString, testString, NFA]);
   return (
     <div className="h-full w-full flex p-12 text-white gap-10">
       <div className="flex h-full w-[45%] flex-col gap-10">
@@ -76,9 +81,12 @@ const Index = () => {
         <div className="flex w-full h-2/3 flex-col">
           <span className="h-fit w-full p-1 text-3xl">Tokens</span>
           <div className="flex flex-col h-full w-full bg-[#2b2b2b] rounded-xl px-2 py-8">
-            {tokens?.map((t) => {
+            {tokens?.map((t, idx) => {
               return (
-                <div className="w-full h-fit p-1 justify-around flex border border-black">
+                <div
+                  className="w-full h-fit p-1 justify-around flex border border-black"
+                  key={idx}
+                >
                   <div>Value: {t.value}</div>
                   <div>Type: {TokenType[t.type]}</div>
                 </div>
