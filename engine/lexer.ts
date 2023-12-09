@@ -7,22 +7,36 @@ function IsOperator(char: string) {
 export function Tokenize(sourceString: string): Token[] {
   const TokensArray = new Array<Token>();
   const sourceArray = sourceString.split("");
-
+  let loc = 0;
+  //failsafe for empty string otherwise the whole program crashes
+  if (sourceString.trim() == "") {
+    return [CreateToken("end", TokenType.RegexEnd, loc)];
+  }
   while (sourceArray.length > 0) {
     if (sourceArray[0] == "(") {
-      TokensArray.push(CreateToken(sourceArray.shift(), TokenType.GroupStart));
+      TokensArray.push(
+        CreateToken(sourceArray.shift(), TokenType.GroupStart, loc++),
+      );
     } else if (sourceArray[0] == ")") {
-      TokensArray.push(CreateToken(sourceArray.shift(), TokenType.GroupEnd));
+      TokensArray.push(
+        CreateToken(sourceArray.shift(), TokenType.GroupEnd, loc++),
+      );
     } else if (sourceArray[0] == "+") {
-      TokensArray.push(CreateToken(sourceArray.shift(), TokenType.OrOperator));
+      TokensArray.push(
+        CreateToken(sourceArray.shift(), TokenType.OrOperator, loc++),
+      );
     } else if (sourceArray[0] == "*") {
       TokensArray.push(
-        CreateToken(sourceArray.shift(), TokenType.GreedyOperator),
+        CreateToken(sourceArray.shift(), TokenType.GreedyOperator, loc++),
       );
-    } else {
-      TokensArray.push(CreateToken(sourceArray.shift(), TokenType.Char));
+    } else if (sourceArray[0] !== "") {
+      let word = "";
+      while (!IsOperator(sourceArray[0]) && sourceArray.length > 0) {
+        word += sourceArray.shift();
+      }
+      TokensArray.push(CreateToken(word, TokenType.Char, loc++));
     }
   }
-  TokensArray.push(CreateToken("end", TokenType.RegexEnd));
+  TokensArray.push(CreateToken("end", TokenType.RegexEnd, loc++));
   return TokensArray;
 }

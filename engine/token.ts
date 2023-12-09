@@ -12,11 +12,17 @@ export enum TokenType {
 export interface Token {
   value: string;
   type: TokenType;
+  loc: number;
 }
 
-export function CreateToken(value: string = "", tokenType: TokenType): Token {
+export function CreateToken(
+  value: string = "",
+  tokenType: TokenType,
+  loc: number,
+): Token {
   return {
     value: value,
     type: tokenType,
+    loc: loc,
   };
 }

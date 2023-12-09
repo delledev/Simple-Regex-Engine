@@ -2,12 +2,14 @@
 import { Regex } from "@/engine/ast";
 import RegexEngine from "@/engine/interface";
 import { Token, TokenType } from "@/engine/token";
+import { Autocomplete, TextField } from "@mui/material";
 import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { JSONTree } from "react-json-tree";
 
 var Fragment = require("@/engine/enfa/fragment.js");
 
 const Index = () => {
+  const [alphabet, setAlphabet] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [regexString, setRegexString] = useState("");
   const [testString, setTestString] = useState("");
@@ -19,12 +21,17 @@ const Index = () => {
 
   const CompileRegex = useCallback(
     (str: string) => {
-      const RegexInstance = regexEngine.compile(str);
-      setAST(RegexInstance.ast);
-      setTokens(RegexInstance.tokens);
-      setNFA(RegexInstance.NFAFragment);
+      const RegexInstance = regexEngine.compile(str, alphabet);
+      if (typeof RegexInstance == "string") {
+        setErrorMessage(RegexInstance);
+      } else {
+        setAST(RegexInstance.ast);
+        setTokens(RegexInstance.tokens);
+        setNFA(RegexInstance.NFAFragment);
+        setErrorMessage("");
+      }
     },
-    [regexEngine],
+    [alphabet, regexEngine],
   );
 
   const TestString = useCallback(
@@ -39,11 +46,11 @@ const Index = () => {
 
   useEffect(() => {
     CompileRegex(regexString);
-  }, [regexString, CompileRegex]);
+  }, [alphabet, regexString, CompileRegex]);
 
   useEffect(() => {
     TestString(testString);
-  }, [TestString, testString, NFA]);
+  }, [alphabet, TestString, testString, NFA]);
   return (
     <div className="h-full w-full flex p-12 text-white gap-10">
       <div className="flex h-full w-[45%] flex-col gap-10">
@@ -52,6 +59,26 @@ const Index = () => {
           <div className="flex h-full w-full bg-[#2b2b2b] rounded-xl p-4">
             <div className="flex h-full w-2/3 ">
               <div className="flex flex-col w-full h-fit m-auto px-12 text-black text-xl gap-4">
+                <div>
+                  <span className="text-white text-xs">
+                    Specify alphabet (If no alphabet rule, leave blank).
+                  </span>
+                  <Autocomplete
+                    sx={{
+                      background: "white",
+                    }}
+                    value={alphabet}
+                    multiple
+                    options={[]}
+                    onChange={(e, array) => {
+                      setAlphabet(array);
+                    }}
+                    freeSolo
+                    renderInput={(params) => (
+                      <TextField {...params} variant="outlined" label="" />
+                    )}
+                  ></Autocomplete>
+                </div>
                 <input
                   className="h-fit w-full text-black"
                   placeholder="Regex String"
@@ -89,6 +116,7 @@ const Index = () => {
                 >
                   <div>Value: {t.value}</div>
                   <div>Type: {TokenType[t.type]}</div>
+                  <div>Location: {t.loc}</div>
                 </div>
               );
             })}
