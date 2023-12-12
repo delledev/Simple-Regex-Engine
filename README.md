@@ -68,15 +68,15 @@ const tokens = regex.getTokens();
 const generatedStrings = regex.generateStrings();
 
 // Test if a specific string is valid according to the compiled regular expression
-const isStringValid = regex.testString('abbbd');
+const isStringValid = regex.testString("abbbd");
 
 // Output the AST, tokens, generated strings, and the result of testing a string
 console.log("Abstract Syntax Tree (AST):", ast);
 console.log("Tokens:", tokens);
 console.log("Generated Strings:", generatedStrings);
 console.log("Is 'abbbd' a valid string?", isStringValid);
+```
 
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
-```
