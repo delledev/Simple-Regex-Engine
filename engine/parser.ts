@@ -44,14 +44,28 @@ export class Parser {
     };
   }
 
-  private verifyCharacterToken(token: Token) {
-    if (this.alphabet.length == 0) return true;
+  private verifyCharacterToken(str: string): boolean {
+    if (this.alphabet.length == 0) {
+      return true;
+    }
 
-    let result = false;
-    this.alphabet.forEach((str) => {
-      token.value.includes(str) ? (result = true) : "";
-    });
-    return result;
+    const sortedWordArray = this.alphabet.sort((a, b) => b.length - a.length);
+
+    while (str.length > 0) {
+      let found = false;
+
+      for (const word of sortedWordArray) {
+        if (str.startsWith(word)) {
+          found = true;
+          str = str.slice(word.length);
+          break;
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private parseNodes(): {
@@ -87,7 +101,6 @@ export class Parser {
           };
           if (branches.length > 0) {
             branches = new Array<AST.Node>();
-            console.log(leftNode);
             if (leftNode) {
               nodes.push(this.disjunctionNode(leftNode, GroupNode));
               leftNode = undefined;
@@ -129,7 +142,7 @@ export class Parser {
         }
         case TokenType.Char: {
           let tokenString = currentToken.value;
-          let verify = this.verifyCharacterToken(currentToken);
+          let verify = this.verifyCharacterToken(currentToken.value);
           if (!verify) {
             return {
               nodes,

@@ -31,10 +31,12 @@ export function Tokenize(sourceString: string): Token[] {
       );
     } else if (sourceArray[0] !== "") {
       let word = "";
+      let stringLoc = loc++;
       while (!IsOperator(sourceArray[0]) && sourceArray.length > 0) {
         word += sourceArray.shift();
+        loc++;
       }
-      TokensArray.push(CreateToken(word, TokenType.Char, loc++));
+      TokensArray.push(CreateToken(word, TokenType.Char, stringLoc));
     }
   }
   TokensArray.push(CreateToken("end", TokenType.RegexEnd, loc++));

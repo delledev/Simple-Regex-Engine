@@ -1,12 +1,10 @@
 "use client";
 import { Regex } from "@/engine/ast";
-import RegexEngine from "@/engine/interface";
+import SRegex from "@/engine/regex";
 import { Token, TokenType } from "@/engine/token";
 import { Autocomplete, TextField } from "@mui/material";
 import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { JSONTree } from "react-json-tree";
-
-var Fragment = require("@/engine/enfa/fragment.js");
 
 const Index = () => {
   const [alphabet, setAlphabet] = useState<string[]>([]);
@@ -15,42 +13,29 @@ const Index = () => {
   const [testString, setTestString] = useState("");
   const [AST, setAST] = useState<Regex>();
   const [tokens, setTokens] = useState<Token[]>();
-  const [regexEngine, setRegexEngine] = useState(new RegexEngine());
-  const [NFA, setNFA] = useState<typeof Fragment>();
+  const [sRegex, setSRegex] = useState<SRegex>(new SRegex("", []));
   const [testResult, setTestResult] = useState<boolean>(false);
+  const [generatedWords, setGeneratedWords] = useState<string[]>([]);
 
-  const CompileRegex = useCallback(
-    (str: string) => {
-      const RegexInstance = regexEngine.compile(str, alphabet);
-      if (typeof RegexInstance == "string") {
-        setErrorMessage(RegexInstance);
-      } else {
-        setAST(RegexInstance.ast);
-        setTokens(RegexInstance.tokens);
-        setNFA(RegexInstance.NFAFragment);
-        setErrorMessage("");
-      }
-    },
-    [alphabet, regexEngine],
-  );
-
-  const TestString = useCallback(
-    (str: string) => {
-      if (testString == "" && !NFA) {
-        return;
-      }
-      setTestResult(NFA?.test(str));
-    },
-    [NFA, testString],
-  );
-
+  //Evalute test results if either test string or regex changes
   useEffect(() => {
-    CompileRegex(regexString);
-  }, [alphabet, regexString, CompileRegex]);
+    setTestResult(sRegex.testString(testString));
+  }, [sRegex, testString]);
 
+  //Evalute values everytime regex changes
   useEffect(() => {
-    TestString(testString);
-  }, [alphabet, TestString, testString, NFA]);
+    console.log(sRegex);
+    setAST(sRegex.getAST());
+    setTokens(sRegex.getTokens());
+    setErrorMessage(sRegex.getErrorMessage());
+    setGeneratedWords(sRegex.generateStrings());
+  }, [sRegex]);
+
+  //Compile regex effect
+  useEffect(() => {
+    setSRegex(new SRegex(regexString, alphabet));
+  }, [alphabet, regexString]);
+
   return (
     <div className="h-full w-full flex p-12 text-white gap-10">
       <div className="flex h-full w-[45%] flex-col gap-10">
@@ -82,7 +67,7 @@ const Index = () => {
                 <input
                   className="h-fit w-full text-black"
                   placeholder="Regex String"
-                  onChange={(e) => setRegexString(e.target.value.trim())}
+                  onChange={(e) => setRegexString(e.target.value)}
                 ></input>
                 <input
                   className={`h-fit w-full ${
@@ -100,8 +85,12 @@ const Index = () => {
               <span>Generated Words</span>
               <div
                 id="wordsContent"
-                className="flex h-full w-full overflow-auto"
-              ></div>
+                className="flex flex-col h-full w-full overflow-auto"
+              >
+                {generatedWords.map((word, i) => (
+                  <span key={i}>{word}</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
