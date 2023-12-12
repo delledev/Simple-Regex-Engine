@@ -37,8 +37,8 @@ const Index = () => {
   }, [alphabet, regexString]);
 
   return (
-    <div className="h-full w-full flex p-12 text-white gap-10">
-      <div className="flex h-full w-[45%] flex-col gap-10">
+    <div className="flex xl:flex-row flex-col h-full w-full p-12 text-white gap-10">
+      <div className="flex h-full xl:w-[45%] w-full  flex-col gap-10">
         <div className="flex-col w-full h-1/3">
           <span className="h-fit w-full p-1 text-3xl">Regex</span>
           <div className="flex h-full w-full bg-[#2b2b2b] rounded-xl p-4">
@@ -112,7 +112,7 @@ const Index = () => {
           </div>
         </div>
       </div>
-      <div className="flex h-full w-[55%] flex-col">
+      <div className="flex h-full w-full xl:w-[55%] flex-col">
         <span className="h-fit w-full p-1 text-3xl">AST</span>
         <div className="flex h-full w-full bg-[#2b2b2b] rounded-xl">
           <JSONTree data={AST} />
