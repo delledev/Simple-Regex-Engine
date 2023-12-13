@@ -77,24 +77,6 @@ export function repeat(nfa: NFA): NFA {
   return { start, end } as NFA;
 }
 
-// Function to add the next reachable states based on epsilon transitions
-export function addNextState(
-  state: State,
-  nextStates: State[],
-  visited: State[],
-) {
-  if (state.epsilonTransitions.length) {
-    for (const st of state.epsilonTransitions) {
-      if (!visited.find((vs) => vs === st)) {
-        visited.push(st);
-        addNextState(st, nextStates, visited);
-      }
-    }
-  } else {
-    nextStates.push(state);
-  }
-}
-
 // Function to test whether a given word is accepted by the NFA
 export function test(nfa: NFA, word: string): boolean {
   // Helper function to compute epsilon closure of a set of states
